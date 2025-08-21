@@ -39,10 +39,17 @@ modules:
     parameters:
       service-key:
         name: capmwithcustomui-auth-key
+  - name: srv-api
   parameters:
     content:
       instance:
         destinations:
+        - Authentication: OAuth2UserTokenExchange
+          HTML5Runtime_enabled: 1200000
+          Name: api-nodejs-srv
+          TokenServiceInstanceName: capmwithcustomui-auth
+          TokenServiceKeyName: capmwithcustomui-auth-key
+          URL: ~{srv-api/srv-url}
         - Name: customui_capmwithcustomui_html_repo_host
           ServiceInstanceName: capmwithcustomui-html5-app-host-service
           ServiceKeyName: capmwithcustomui_html_repo_host-key
