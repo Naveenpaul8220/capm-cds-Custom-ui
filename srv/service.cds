@@ -6,5 +6,3 @@ service MyTransactionService {
     entity Transaction as projection on db.Transaction;
 
 }
-
-annotate transaction.Transaction with @odata.draft.enabled;

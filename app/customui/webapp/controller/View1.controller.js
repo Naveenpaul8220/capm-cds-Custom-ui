@@ -15,18 +15,14 @@ sap.ui.define([
         onCreateTransaction: function () {
             var oDialog = new Dialog({
                 title: "Create Transaction",
-                width:"50%",
+                contentWidth: "600px", 
                 content: [
-                    new Label({ text: "Transaction ID" }),
-                    new Input({ id: "transactionId", value: "" }),
                     new Label({ text: "Sender Name" }),
-                    new Input({ id: "senderName", value: "" }),
+                    new Input({ id: "senderName", value: "", width: "100%" }),
                     new Label({ text: "Receiver Name" }),
-                    new Input({ id: "receiverName", value: ""  }),
+                    new Input({ id: "receiverName", value: "", width: "100%" }),
                     new Label({ text: "Amount Paid" }),
-                    new Input({ id: "amountPaid", value: "",  type: "Number" }),
-                    new Label({ text: "Paid On" }),
-                    new DatePicker({ id: "paidOn", value: "",  valueFormat: "yyyy-MM-dd" })
+                    new Input({ id: "amountPaid", value: "", width: "100%", type: "Number" })
                 ],
                 beginButton: new Button({
                     text: "Submit",
@@ -46,37 +42,42 @@ sap.ui.define([
             });
             oDialog.open();
         },
+
         _submitTransaction: function (oDialog) {
-            // Get input values
-            var oView = sap.ui.getCore();
-            var sTransactionId = oView.byId("transactionId").getValue();
-            var sSenderName = oView.byId("senderName").getValue();
-            var sReceiverName = oView.byId("receiverName").getValue();
-            var sAmountPaid = oView.byId("amountPaid").getValue();
-            var sPaidOn = oView.byId("paidOn").getValue();
-            if (!sTransactionId || !sSenderName || !sReceiverName || !sAmountPaid || !sPaidOn) {
+            var oCore = sap.ui.getCore();
+            var sSenderName = oCore.byId("senderName").getValue();
+            var sReceiverName = oCore.byId("receiverName").getValue();
+            var sAmountPaid = oCore.byId("amountPaid").getValue();
+            if (!sSenderName || !sReceiverName || !sAmountPaid) {
                 MessageBox.error("Please fill in all fields.");
                 return;
             }
             var oNewTransaction = {
-                TransactionId: sTransactionId,
                 SenderName: sSenderName,
                 ReceiverName: sReceiverName,
-                AmountPaid: parseFloat(sAmountPaid),
-                Paidon: sPaidOn
+                AmountPaid: parseFloat(sAmountPaid)
             };
             var oModel = this.getView().getModel();
             var oListBinding = oModel.bindList("/Transaction");
             oListBinding.create(oNewTransaction, {
-                success: function () {
-                    MessageBox.success("Transaction created successfully!");
-                    oDialog.close();
-                    oModel.refresh();
+                success: function (response) {
+                    console.log("Success response:", response);
+                    sap.ui.getCore().getLibraryResourceBundle("sap/m").then(function (oBundle) {
+                        MessageBox.success("Transaction created successfully!", {
+                            onClose: function () {
+                                oDialog.close();
+                                oModel.refresh(); 
+                            }
+                        });
+                    }).catch(function (oError) {
+                        console.error("Error loading MessageBox resource bundle:", oError);
+                    });
                 },
                 error: function (oError) {
+                    console.error("Error creating transaction:", oError);
                     MessageBox.error("Error creating transaction: " + (oError.message || "Unknown error"));
                 }
             });
-        }
+        },
     });
 });

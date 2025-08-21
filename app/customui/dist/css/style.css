@@ -1,1 +1,11 @@
 /* Enter your custom styles here */
+
+.customDialog .sapMDialog {
+    padding: 1rem;
+}
+.customDialog .sapMLabel {
+    margin-bottom: 0.5rem;
+}
+.customDialog .sapMInput {
+    margin-bottom: 1rem;
+}
