@@ -1,0 +1,1 @@
+using MyTransactionService as service from '../../srv/service';

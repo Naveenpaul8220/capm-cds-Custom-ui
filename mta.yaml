@@ -1,0 +1,129 @@
+_schema-version: 3.3.0
+ID: capmwithcustomui
+description: A simple CAP project.
+version: 1.0.0
+modules:
+- name: capmwithcustomui-srv
+  type: nodejs
+  path: gen/srv
+  requires:
+  - name: capmwithcustomui-auth
+  - name: capmwithcustomui-db
+  provides:
+  - name: srv-api
+    properties:
+      srv-url: ${default-url}
+  parameters:
+    buildpack: nodejs_buildpack
+    instances: 1
+  build-parameters:
+    builder: npm-ci
+- name: capmwithcustomui-db-deployer
+  type: hdb
+  path: gen/db
+  requires:
+  - name: capmwithcustomui-db
+  parameters:
+    buildpack: nodejs_buildpack
+- name: capmwithcustomui-destination-content
+  type: com.sap.application.content
+  requires:
+  - name: capmwithcustomui-destination-service
+    parameters:
+      content-target: true
+  - name: capmwithcustomui_html_repo_host
+    parameters:
+      service-key:
+        name: capmwithcustomui_html_repo_host-key
+  - name: capmwithcustomui-auth
+    parameters:
+      service-key:
+        name: capmwithcustomui-auth-key
+  parameters:
+    content:
+      instance:
+        destinations:
+        - Name: customui_capmwithcustomui_html_repo_host
+          ServiceInstanceName: capmwithcustomui-html5-app-host-service
+          ServiceKeyName: capmwithcustomui_html_repo_host-key
+          sap.cloud.service: customui
+        - Authentication: OAuth2UserTokenExchange
+          Name: customui_capmwithcustomui_auth
+          ServiceInstanceName: capmwithcustomui-auth
+          ServiceKeyName: capmwithcustomui-auth-key
+          sap.cloud.service: customui
+        existing_destinations_policy: ignore
+  build-parameters:
+    no-source: true
+- name: capmwithcustomui-app-content
+  type: com.sap.application.content
+  path: .
+  requires:
+  - name: capmwithcustomui_html_repo_host
+    parameters:
+      content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+    - artifacts:
+      - customui.zip
+      name: customui
+      target-path: resources/
+- name: customui
+  type: html5
+  path: app/customui
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+resources:
+- name: capmwithcustomui-auth
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      tenant-mode: dedicated
+      xsappname: capmwithcustomui-${org}-${space}
+    path: ./xs-security.json
+    service: xsuaa
+    service-plan: application
+- name: capmwithcustomui-db
+  type: com.sap.xs.hdi-container
+  parameters:
+    service: hana
+    service-plan: hdi-shared
+- name: capmwithcustomui-destination-service
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      HTML5Runtime_enabled: true
+      init_data:
+        instance:
+          destinations:
+          - Authentication: NoAuthentication
+            Name: ui5
+            ProxyType: Internet
+            Type: HTTP
+            URL: https://ui5.sap.com
+          existing_destinations_policy: update
+      version: 1.0.0
+    service: destination
+    service-name: capmwithcustomui-destination-service
+    service-plan: lite
+- name: capmwithcustomui_html_repo_host
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-name: capmwithcustomui-html5-app-host-service
+    service-plan: app-host
+parameters:
+  deploy_mode: html5-repo
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+  - builder: custom
+    commands:
+    - npm ci
+    - npx cds build --production
