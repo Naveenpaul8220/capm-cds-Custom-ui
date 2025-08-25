@@ -7,7 +7,7 @@
       "target": "/odata/$1",
       "authenticationType": "xsuaa",
       "destination": "api-nodejs-srv",
-      "csrfProtection":false
+      "csrfProtection":true
       
     },
     {
