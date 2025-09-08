@@ -15,14 +15,14 @@ sap.ui.define([
         onCreateTransaction: function () {
             var oDialog = new Dialog({
                 title: "Create Transaction",
-                contentWidth: "600px", 
+                contentWidth: "50%",
                 content: [
                     new Label({ text: "Sender Name" }),
-                    new Input({ id: "senderName", value: "", width: "100%" }),
+                    new Input({ id: "senderName", value: "", width: "20%" }),
                     new Label({ text: "Receiver Name" }),
-                    new Input({ id: "receiverName", value: "", width: "100%" }),
+                    new Input({ id: "receiverName", value: "", width: "20%" }),
                     new Label({ text: "Amount Paid" }),
-                    new Input({ id: "amountPaid", value: "", width: "100%", type: "Number" })
+                    new Input({ id: "amountPaid", value: "", width: "20%", type: "Number" })
                 ],
                 beginButton: new Button({
                     text: "Submit",
@@ -59,25 +59,23 @@ sap.ui.define([
             };
             var oModel = this.getView().getModel();
             var oListBinding = oModel.bindList("/Transaction");
-            oListBinding.create(oNewTransaction, {
-                success: function (response) {
-                    console.log("Success response:", response);
-                    sap.ui.getCore().getLibraryResourceBundle("sap/m").then(function (oBundle) {
-                        MessageBox.success("Transaction created successfully!", {
-                            onClose: function () {
-                                oDialog.close();
-                                oModel.refresh(); 
-                            }
-                        });
-                    }).catch(function (oError) {
-                        console.error("Error loading MessageBox resource bundle:", oError);
-                    });
-                },
-                error: function (oError) {
-                    console.error("Error creating transaction:", oError);
-                    MessageBox.error("Error creating transaction: " + (oError.message || "Unknown error"));
-                }
-            });
+            try {
+                const oContext = oListBinding.create(oNewTransaction);
+
+                oContext.created()
+                    .then((response) => {
+                        var sMessage = response.Message || "Transaction Created!";
+                        MessageBox.success(sMessage);
+                        console.log("Response:", response);
+                    })
+                    .catch((err) => {
+                        var sErrorMsg = err?.responseJSON?.error?.message || "Transaction failed. Please try again.";
+                        MessageBox.error(sErrorMsg);
+                        console.error("Call Off Error:", err);
+                    })
+            } catch (error) {
+                console.log("cateched error", error)
+            }
         },
     });
 });
