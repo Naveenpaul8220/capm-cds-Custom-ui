@@ -64,15 +64,15 @@ sap.ui.define([
 
                 oContext.created()
                     .then((response) => {
-                        var sMessage = response.Message || "Transaction Created!";
-                        MessageBox.success(sMessage);
-                        console.log("Response:", response);
+                        //var sMessage = response.message || "Transaction Created!";
+                        MessageBox.success("Transaction Createed Succesfully!!!!!!!!!!!!");
+                        
                     })
-                    .catch((err) => {
-                        var sErrorMsg = err?.responseJSON?.error?.message || "Transaction failed. Please try again.";
-                        MessageBox.error(sErrorMsg);
-                        console.error("Call Off Error:", err);
-                    })
+                    // .catch((err) => {
+                    //     var sErrorMsg = err?.responseJSON?.error?.message;
+                    //     MessageBox.error(sErrorMsg);
+                    //     console.error("Call Off Error:", err);
+                    // })
             } catch (error) {
                 console.log("cateched error", error)
             }

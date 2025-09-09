@@ -64,7 +64,7 @@
                     >
                         <m:Label
                             id="_IDGenLabel1"
-                            text="Sender Name"
+                            text="SenderName"
                         />
                         <template>
                             <m:Text
